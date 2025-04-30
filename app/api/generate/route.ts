@@ -51,6 +51,8 @@ export async function POST(req: Request) {
 
     // Parse and return the result from the API response
     const data = await response.json();
+    console.log("OpenRouter API Response:", data); 
+
     const result = data.choices?.[0]?.message?.content || "No result found.";
 
     // Return the response to the client
