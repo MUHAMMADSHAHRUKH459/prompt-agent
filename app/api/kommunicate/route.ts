@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const prompt = body.queryResult?.queryText || "No input received.";
+    const prompt = body?.queryResult?.queryText;
 
     const systemInstruction = `
       You are a prompt engineer. 
@@ -21,33 +21,27 @@ export async function POST(req: Request) {
         model: "openai/gpt-3.5-turbo",
         messages: [
           { role: "system", content: systemInstruction.trim() },
-          { role: "user", content: prompt }
-        ]
+          { role: "user", content: prompt },
+        ],
       }),
     });
 
     const data = await response.json();
-    console.log("OpenRouter API Response:", data); // ✅ Debugging ke liye
+    console.log("OpenRouter Response:", data);
 
-    const result = data.choices?.[0]?.message?.content || "No result from AI.";
+    const result = data.choices?.[0]?.message?.content || "No result found.";
 
-    // Return response in Dialogflow-compatible format
-    return new Response(
-      JSON.stringify({ fulfillmentText: result }),
-      {
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({
+      fulfillmentText: result
+    }), {
+      headers: { "Content-Type": "application/json" }
+    });
+
   } catch (error: any) {
-    return new Response(
-      JSON.stringify({
-        fulfillmentText: "Sorry, there was an error processing your request.",
-        error: error.message,
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify({
+      fulfillmentText: "An error occurred: " + error.message
+    }), {
+      headers: { "Content-Type": "application/json" }
+    });
   }
 }
